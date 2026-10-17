@@ -1,14 +1,19 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends
+from typing import Annotated
+from fastapi.security import OAuth2PasswordRequestForm
+
 
 from schemas.teacher_schemas import TeacherUpdate,TeacherCreate,TeacherBase
 from database.database import SessionDep
+from core.dependencies import get_current_teacher
 from model.teacher import Teacher
 from service.teacher_service import (
     teacher_data,
     teacher_register,
     teachers_data,
     modify_teacher,
-    remove_teacher
+    remove_teacher,
+    login_token
 )
 
 router = APIRouter(prefix="/Teacher",tags=['Teachers'])
@@ -19,6 +24,20 @@ def teacher_registration(
     session: SessionDep
 ):
     return teacher_register(data, session)
+
+@router.post("/login")
+def teacher_login(request_token : Annotated[OAuth2PasswordRequestForm, Depends()], session : SessionDep):
+    return login_token(request_token.username,request_token.password,session)
+
+@router.get("/me")
+def get_my_profile(current_teacher : Annotated[Teacher, Depends(get_current_teacher)]):
+    return {
+        'id' : current_teacher.id,
+        'email' : current_teacher.email,
+        'name' : current_teacher.name,
+        'department' : current_teacher.department
+    }
+
 
 @router.get("/", response_model=list[TeacherBase])
 def get_teachers(

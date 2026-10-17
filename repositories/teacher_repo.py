@@ -12,6 +12,20 @@ def get_all_data(session : SessionDep) -> list[TeacherBase]:
 
     return teachers
 
+def get_data_by_email(email: str, session: SessionDep) -> Teacher:
+    statement = select(Teacher).where(Teacher.email == email)
+    teacher = session.exec(statement).first()
+
+    if teacher is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Teacher not found with this email"
+        )
+
+    return teacher
+    
+
+
 def get_teacher_by_id(id : int , session : SessionDep) -> TeacherBase:
 
     teacher = session.get(Teacher, id )

@@ -4,4 +4,4 @@ pydantic[email]
 pydantic-settings
 sqlmodel
 pytest
-
+pyjwt
